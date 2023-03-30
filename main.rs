@@ -21,7 +21,7 @@ const DIR_HOLIDAY: &str = "holiday";
 
   IMPORTANT: Limit must be less than minimum number of Book IDs in lib*.xml
 */
-const REPEAT_AFTER: usize = 6;
+const REPEAT_AFTER: usize = 4;
 
 mod utils;
 use utils as Utils;
@@ -36,74 +36,68 @@ mod holiday;
 use holiday as Holiday;
 
 fn main() {
-    //gen_catalog();
-    //gen_non_repeated_catalog();
-    gen_non_repeated_catalog_with_holiday_recommendation();
+    // gen_catalog();
+    gen_non_repeated_catalog();
+    // gen_non_repeated_catalog_with_holiday_recommendation();
 }
 
 /*
   Generate catalogs based on default criteria
 */
-fn gen_catalog() {
-    let mem_books = Books::get_generic_books(DIR_BOOK);
-    let mem_libraries = Library::get_generic_libraries(DIR_LIBRARY);
-    //  println!("{mem_books:#?}");
-    loop {
-        let user_readtime = if let Some(minutes) = Utils::readtime() {
-            minutes
-        } else {
+/* fn gen_catalog() {
+  let mem_books = Books::get_generic_books(DIR_BOOK);
+  let mem_libraries = Library::get_generic_libraries(DIR_LIBRARY);
+
+  loop {
+    let user_readtime = if let Some(minutes) = Utils::readtime() { minutes } else { continue; };
+
+    if let Some(libraries) = Library::get_available_libraries(&mem_libraries) {
+      println!("{} libraries found!", libraries.len());
+
+      let mut total_readtime = 0;
+      let mut book_list = Vec::new();
+      let mut catalog_items = Vec::new();
+      let mut catalog = String::from("<?xml version=\"1.0\"?>\n<catalog-list>\n");
+
+      for library in libraries {
+        // Check guard for early breakout
+        if total_readtime >= user_readtime { break; }
+
+        let st = library.metadata.starttime.as_str();
+        let start_at = Library::time_in_minutes(st);
+        let et = library.metadata.endtime.as_str();
+        let end_at = Library::time_in_minutes(et);
+        let lib_time = end_at - start_at;
+
+        let mut session = 0;
+        loop {
+          if session < lib_time && total_readtime < user_readtime {
+            let book_id = library.get_rand_book(&mut book_list);
+            let book = mem_books.get(&book_id).unwrap();
+
+            session += book.read_time();
+            total_readtime += book.read_time();
+            catalog_items.push(book.content.to_owned());
+
             continue;
-        };
+          }
 
-        if let Some(libraries) = Library::get_available_libraries(&mem_libraries) {
-            println!("{} libraries found!", libraries.len());
-
-            let mut total_readtime = 0;
-            let mut book_list = Vec::new();
-            let mut catalog_items = Vec::new();
-            let mut catalog = String::from("<?xml version=\"1.0\"?>\n<catalog-list>\n");
-
-            for library in libraries {
-                // Check guard for early breakout
-                if total_readtime >= user_readtime {
-                    break;
-                }
-
-                let st = library.metadata.starttime.as_str();
-                let start_at = Library::time_in_minutes(st);
-                let et = library.metadata.endtime.as_str();
-                let end_at = Library::time_in_minutes(et);
-                let lib_time = end_at - start_at;
-
-                let mut session = 0;
-                loop {
-                    if session < lib_time && total_readtime < user_readtime {
-                        let book_id = library.get_rand_book(&mut book_list);
-                        let book = mem_books.get(&book_id).unwrap();
-                        // print!("{}", book_uid);
-                        //  println!("{book:#?}");
-                        session += book.read_time();
-                        total_readtime += book.read_time();
-                        catalog_items.push(book.content.to_owned());
-
-                        continue;
-                    }
-
-                    break;
-                }
-            }
-
-            let books = catalog_items.join("\n");
-            catalog.push_str(&format!("{books}</catalog-list>"));
-
-            println!("Saving catalog.xml in working directory\n\n");
-            fs::write("catalog.xml", catalog).expect("Unable to write file");
-        } else {
-            println!("No libraries are open at the moment!\n");
+          break;
         }
+      }
+
+      let books = catalog_items.join("");
+      catalog.push_str(&format!("{books}</catalog-list>"));
+
+      println!("Saving catalog.xml in working directory\n\n");
+      fs::write("catalog.xml", catalog).expect("Unable to write file");
+    } else {
+      println!("No libraries are open at the moment!\n");
     }
+  }
 }
 
+ */
 /*
   Generate catalogs based on default criteria
   With non repeated book sequence
@@ -156,7 +150,7 @@ fn gen_non_repeated_catalog() {
                 }
             }
 
-            let books = catalog_items.join("");
+            let books = catalog_items.join("\n");
             catalog.push_str(&format!("{books}</catalog-list>"));
 
             println!("Saving catalog.xml in working directory\n\n");

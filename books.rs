@@ -40,11 +40,9 @@ pub fn get_generic_books(dir: &str) -> HashMap<String, Books::Book> {
     let books = Utils::read_file_contents(dir, pattern);
 
     for book in books {
-        // println!("{}", book);
         let book_id = Utils::extract_id(&book).unwrap();
-        //  println!("{}", book_id);
         let readtime = Utils::extract_readtime(&book).unwrap();
-        //println!("{}", readtime);
+
         let data = Book {
             id: book_id.clone(),
             readtime: readtime.parse::<u32>().unwrap(),

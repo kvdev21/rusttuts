@@ -84,7 +84,9 @@ pub fn get_available_libraries(libraries: &Vec<Library>) -> Option<Vec<Library>>
     let mut catalogs = Vec::new();
     let current_hour = offset::Local::now().hour();
     let today = offset::Local::now().weekday().num_days_from_sunday() + 1;
-    println!("{} today!", today);
+
+    // print
+    println!("{}", today);
     // For manual query
     // let today = 5;
     // let current_hour = 10;
@@ -94,9 +96,14 @@ pub fn get_available_libraries(libraries: &Vec<Library>) -> Option<Vec<Library>>
             // Converts time HH:MM into minutes
             let start_at = time_in_minutes(library.metadata.starttime.as_str());
             let end_at = time_in_minutes(library.metadata.endtime.as_str());
+            // if end_at < start_at {
+            //     end_at = end_at + (24 * 60);
+            // }
+
+            println!("{} {}", start_at, end_at);
             let time_span = end_at - start_at;
 
-            if time_span != 0 && current_hour * 60 >= start_at && current_hour * 60 < end_at {
+            if time_span != 0 && current_hour * 60 >= start_at && current_hour * 60 <= end_at {
                 catalogs.push(library.clone());
             }
         }
